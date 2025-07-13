@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktive Analyse: #instalehrerzimmer & Bildungsinfluencer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'EB Garamond', serif;
+            background-color: transparent; /* Added for potential iframe embedding */
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 16px; /* Tailwind: rounded-2xl */
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.06), 0 6px 8px -6px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+            padding: 24px; /* Tailwind: p-6 */
+            margin-top: 24px; /* Tailwind: mt-6 */
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #f0e6ff; /* Lighter purple for background */
+            border-radius: 8px; /* Tailwind: rounded-lg */
+            margin-bottom: 16px; /* Tailwind: mb-4 */
+            overflow: hidden;
+            border: 1px solid #e0cffc; /* Slightly darker purple border */
+        }
+        .progress-bar {
+            width: 0%;
+            height: 20px; /* Tailwind: h-5 */
+            background-color: #6ee7b7; /* Emerald-400 for progress */
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #065f46; /* Emerald-800 for text */
+            font-size: 0.75rem; /* Tailwind: text-xs */
+            font-weight: 600; /* Tailwind: font-semibold */
+        }
+
+        .nav-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Tailwind: gap-2 */
+            padding: 12px 10px; /* Adjusted padding */
+            border-radius: 10px; /* Tailwind: rounded-lg (slightly more rounded) */
+            font-weight: 500; /* Tailwind: font-medium */
+            transition: all 0.3s ease-in-out;
+            border: 1px solid #e0cffc; /* Light purple border */
+            cursor: pointer;
+            background-color: #f9f5ff; /* Very light purple background */
+            color: #8b5cf6; /* Violet-500 */
+            font-size: 0.9rem; /* Slightly smaller font */
+            text-align: center;
+        }
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(192, 132, 252, 0.2); /* Violet-400 shadow */
+            background-color: #f0e6ff; /* Lighter purple hover */
+            border-color: #d8b4fe; /* Darker purple border hover */
+        }
+        .nav-button.active {
+            background-color: #a78bfa; /* Violet-500 */
+            color: white;
+            font-weight: 600; /* Tailwind: font-semibold */
+            box-shadow: 0 4px 14px rgba(167, 139, 250, 0.4); /* Violet-500 shadow */
+            border-color: transparent;
+        }
+        .nav-button.visited:not(.active) {
+            background-color: #f0fdfa; /* Emerald-50 */
+            color: #0d9488; /* Teal-600 */
+            border-color: #99f6e4; /* Emerald-200 */
+        }
+         .nav-button.visited:not(.active):hover {
+            background-color: #ccfbf1; /* Emerald-100 */
+            border-color: #5eead4; /* Emerald-300 */
+        }
+        .nav-button.locked {
+            background-color: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; /* Tailwind grays */
+            cursor: not-allowed; opacity: 0.7;
+        }
+        .nav-button.locked:hover {
+            transform: none; box-shadow: none; background-color: #f3f4f6; border-color: #e5e7eb;
+        }
+        .nav-button .icon { width: 18px; height: 18px; }
+        .nav-button.active .icon path { stroke: white; }
+        .nav-button.visited:not(.active) .icon path { stroke: #0d9488; }
+        .nav-button .visited-icon { width: 16px; height: 16px; color: #10b981; display: none; }
+        .nav-button.visited .visited-icon { display: inline-block; }
+        .nav-button.locked .visited-icon { display: none; }
+        .nav-button.locked .icon path { stroke: #9ca3af; }
+
+        /* Initial Video Section Styling */
+        .initial-video-container {
+            background-color: white; border-radius: 16px; /* rounded-2xl */
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.06), 0 6px 8px -6px rgba(0, 0, 0, 0.06);
+            padding: 24px; margin-bottom: 32px; text-align: center;
+        }
+        .video-embed-placeholder {
+            background-color: #4b5563; border-radius: 12px; min-height: 360px; /* Tailwind: rounded-xl, min-h-96 (approx) */
+            width: 100%; max-width: 640px; margin: 0 auto 24px auto; /* Tailwind: max-w-2xl, mx-auto, mb-6 */
+            display: flex; align-items: center; justify-content: center; color: #d1d5db;
+        }
+        .video-embed-placeholder svg { width: 60px; height: 60px; color: #9ca3af; }
+
+        .proceed-button {
+            background-color: #a78bfa; color: white; padding: 12px 24px; /* py-3 px-6 */
+            border-radius: 8px; font-weight: 600; /* rounded-lg, font-semibold */
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+            font-size: 1rem; /* text-base */
+        }
+        .proceed-button:hover { background-color: #8b5cf6; transform: scale(1.05); }
+
+        /* Typography */
+        h1.main-title { color: #7e22ce; font-size: 2.5rem; } /* Purple-700 */
+        h2.section-title { color: #8b5cf6; font-size: 1.75rem; } /* Violet-500 */
+        h3.content-title {
+            font-size: 1.6rem; font-weight: 600; margin-bottom: 1rem; color: #6b21a8; /* Purple-800 */
+        }
+        h4 { 
+            font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; 
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        h4 .heading-icon {
+            width: 20px; height: 20px;
+            opacity: 0.7;
+        }
+        p, li { font-size: 1.05rem; line-height: 1.6; }
+        ul { list-style-type: none; padding-left: 0; margin-bottom: 1rem; }
+        li { margin-bottom: 0.75rem; padding-left: 1.75rem; position: relative; color: #374151; } /* Gray-700 */
+        li::before {
+            content: '✓'; position: absolute; left: 0; color: #a78bfa; /* Violet-500 */
+            font-weight: bold; font-size: 1rem;
+        }
+        strong.chance { color: #10b981; font-weight: 600; } /* Emerald-500 */
+        strong.risiko { color: #ef4444; font-weight: 600; } /* Red-500 */
+
+        /* Themed Blocks for sections */
+        .themed-block {
+            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+        .themed-block:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .kdd-section .border-accent { border-color: #6ee7b7 !important; } /* Emerald-400 */
+        .kdd-section h4 { color: #0d9488 !important; } /* Teal-600 */
+        .kdd-section .bg-accent { background-color: #f0fdfa !important; } /* Emerald-50 */
+        .kdd-section .heading-icon path { stroke: #0d9488; }
+
+        .insta-section .border-accent { border-color: #fbcfe8 !important; } /* Pink-200 */
+        .insta-section h4 { color: #db2777 !important; } /* Pink-600 */
+        .insta-section .bg-accent { background-color: #fdf2f8 !important; } /* Pink-50 */
+        .insta-section .heading-icon path { stroke: #db2777; }
+
+        .influencer-section .border-accent { border-color: #fde68a !important; } /* Amber-200 */
+        .influencer-section h4 { color: #d97706 !important; } /* Amber-600 */
+        .influencer-section .bg-accent { background-color: #fefce8 !important; } /* Amber-50 */
+        .influencer-section .heading-icon path { stroke: #d97706; }
+        
+        .fazit-section .border-accent { border-color: #c4b5fd !important; } /* Violet-300 */
+        .fazit-section h4 { color: #8b5cf6 !important; } /* Violet-500 */
+        .fazit-section .bg-accent { background-color: #ede9fe !important; } /* Violet-50 */
+        .fazit-section .heading-icon path { stroke: #8b5cf6; }
+
+        /* Weiterbildung Section */
+        .weiterbildung-section .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .resource-card {
+            background-color: #f9f5ff; /* Violet-50 (lighter) */
+            border: 1px solid #e0cffc; /* Violet-200 */
+            border-radius: 12px; /* rounded-xl */
+            padding: 1.5rem; /* p-6 */
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer; /* For AI card */
+        }
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(167, 139, 250, 0.2); /* Violet-400 shadow */
+            border-color: #a78bfa; /* Violet-500 */
+        }
+        .resource-card h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #7e22ce; /* Purple-700 */
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+         .resource-card h5 .heading-icon {
+            margin-right: 0.5rem;
+            opacity: 0.8;
+        }
+        .resource-card p {
+            font-size: 0.95rem;
+            color: #581c87; /* Purple-900 */
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+        .resource-card a.external-link-button { /* Specific class for external links */
+            display: inline-block;
+            background-color: #a78bfa; /* Violet-500 */
+            color: white;
+            padding: 0.6rem 1rem; /* py-2.5 px-4 */
+            border-radius: 8px; /* rounded-lg */
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+            text-decoration: none; /* Ensure links are not underlined */
+        }
+        .resource-card a.external-link-button:hover {
+            background-color: #8b5cf6; /* Violet-600 */
+        }
+
+        /* AI Modal Styling */
+        .ai-modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s linear;
+        }
+        .ai-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+        .ai-modal-content {
+            background-color: white;
+            padding: 2rem; /* p-8 */
+            border-radius: 12px; /* rounded-xl */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px; /* max-w-2xl */
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .ai-modal-overlay.visible .ai-modal-content {
+            transform: scale(1);
+        }
+        .ai-modal-content h4 {
+            color: #7e22ce; /* Purple-700 */
+            margin-top: 0;
+            margin-bottom: 1.5rem; /* mb-6 */
+            text-align: center;
+        }
+        .ai-modal-content textarea {
+            width: 100%;
+            padding: 0.75rem; /* p-3 */
+            border: 1px solid #d8b4fe; /* Violet-300 */
+            border-radius: 8px; /* rounded-lg */
+            min-height: 80px;
+            margin-bottom: 1rem; /* mb-4 */
+            font-family: 'EB Garamond', serif;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .ai-modal-content button {
+            background-color: #a78bfa; /* Violet-500 */
+            color: white;
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 8px; /* rounded-lg */
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: block;
+            margin: 0 auto 1rem auto; /* mx-auto mb-4 */
+        }
+        .ai-modal-content button:hover {
+            background-color: #8b5cf6; /* Violet-600 */
+        }
+        .ai-modal-close-button {
+            background-color: #e5e7eb !important; /* Gray-200 for close */
+            color: #4b5563 !important; /* Gray-600 */
+            margin-top: 0.5rem; /* mt-2 */
+        }
+        .ai-modal-close-button:hover {
+             background-color: #d1d5db !important; /* Gray-300 */
+        }
+        #ai-response-area {
+            margin-top: 1.5rem; /* mt-6 */
+            padding: 1rem; /* p-4 */
+            background-color: #f9f5ff; /* Violet-50 */
+            border-radius: 8px; /* rounded-lg */
+            border: 1px solid #e0cffc; /* Violet-200 */
+            min-height: 100px;
+            white-space: pre-wrap; /* Preserve line breaks and spaces in AI response */
+            font-size: 1rem;
+            color: #374151; /* Gray-700 */
+        }
+        #ai-response-area strong { /* Style for bold text from AI */
+            font-weight: 600; /* Tailwind: font-semibold or direct value */
+        }
+        .loading-indicator {
+            text-align: center;
+            color: #8b5cf6; /* Violet-500 */
+            font-style: italic;
+        }
+
+
+        /* Poll Styling */
+        .sequential-poll-container {
+            margin-top: 1.5rem; margin-bottom:1.5rem; padding: 1.5rem;
+            background-color: #f9f5ff; /* Violet-50 */
+            border: 1px solid #e0cffc; /* Violet-200 */
+            border-radius: 12px; /* rounded-xl */
+        }
+        .poll-question-step { margin-bottom: 1.5rem; }
+        .poll-question-step:last-child { margin-bottom: 0; }
+
+        .poll-thesis {
+            font-size: 1.1rem; font-weight: 600; color: #6b21a8; /* Purple-800 */
+            margin-bottom: 1rem;
+        }
+        .poll-options { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1rem; }
+        .poll-button {
+            padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 500;
+            transition: background-color 0.2s ease, transform 0.2s ease; cursor: pointer;
+            font-size: 0.9rem; border: 1px solid;
+        }
+        .poll-button.agree {
+            background-color: #d1fae5; color: #047857; /* Emerald-100, Emerald-700 */
+            border-color: #a7f3d0; /* Emerald-200 */
+        }
+        .poll-button.agree:hover { background-color: #a7f3d0; transform: translateY(-2px); }
+        .poll-button.disagree {
+            background-color: #ffe4e6; color: #be123c; /* Rose-100, Rose-700 */
+            border-color: #fecdd3; /* Rose-200 */
+        }
+        .poll-button.disagree:hover { background-color: #fecdd3; transform: translateY(-2px); }
+
+        #collected-poll-results h4 {
+             color: #581c87; text-align: center; margin-bottom: 1.5rem; /* Purple-900 */
+        }
+        #collected-poll-results .poll-thesis.text-sm {
+            font-size: 0.95rem; color: #6b21a8; font-weight: 500; /* Purple-800 */
+        }
+        .result-bar-container { display: flex; height: 24px; background-color: #e9d5ff; border-radius: 6px; overflow: hidden; margin-bottom: 0.5rem; border: 1px solid #d8b4fe;} /* Purple-200, Violet-300 */
+        .result-bar-fill {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; color: white; font-weight: 600;
+            transition: width 0.5s ease-in-out; padding: 0 0.5rem;
+        }
+        .result-bar-fill.agree { background-color: #34d399; } /* Emerald-400 */
+        .result-bar-fill.disagree { background-color: #fb7185; } /* Rose-400 */
+        .poll-disclaimer { font-size: 0.8rem; color: #9ca3af; margin-top: 0.75rem; font-style: italic; } /* Gray-400 */
+
+        .post-poll-content.hidden { display: none; }
+        .post-poll-content { animation: fadeIn 0.5s ease-in-out forwards; }
+
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
+        .hidden { display: none; }
+        .completion-message {
+            text-align: center; padding: 16px; background-color: #d1fae5; color: #047857; /* Emerald-100, Emerald-700 */
+            border: 1px solid #6ee7b7; border-radius: 8px; margin-top: 16px; /* Emerald-300 */
+            font-weight: 500; font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8"> <div class="max-w-5xl mx-auto"> <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 main-title">#instalehrerzimmer & Co.</h1>
+            <p class="text-gray-600 text-xl">Interaktive Entdeckungsreise in die Kultur der Digitalität.</p>
+        </header>
+
+        <section id="initial-video-section" class="initial-video-container">
+            <h2 class="text-2xl font-semibold mb-4 section-title">Startpunkt: Ein Blick auf Instagram-Reels</h2>
+            <p class="text-gray-600 mb-6">Bitte sieh dir zuerst dieses kurze Video an, um einen Eindruck vom Thema zu bekommen. Es zeigt typische Ausschnitte, wie sie im #instalehrerzimmer und von Bildungsinfluencerinnen geteilt werden.</p>
+            <div class="video-embed-placeholder">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <button id="proceed-to-interactive" class="proceed-button">
+                Weiter zur interaktiven Analyse
+            </button>
+        </section>
+
+        <div id="interactive-section" class="hidden">
+            <div class="progress-bar-container">
+                <div id="progress-bar-fill" class="progress-bar">0%</div>
+            </div>
+            <nav class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-10"> 
+                <button data-target="intro" class="nav-button">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" /></svg>
+                    <span>Start</span>
+                    <svg class="visited-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+                <button data-target="kdd" class="nav-button">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03 4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A11.978 11.978 0 0112 16.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 003 12c0 .778.099 1.533.284 2.253m0 0c-.607 1.561-1.609 3-2.84 3.868" /></svg>
+                    <span>Digitalität</span>
+                    <svg class="visited-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+                <button data-target="instalehrerzimmer" class="nav-button">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                    <span>#Insta</span>
+                    <svg class="visited-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+                <button data-target="bildungsfluencer" class="nav-button">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.31h5.518a.563.563 0 01.329.89l-4.455 3.242a.563.563 0 00-.182.557l1.685 5.345a.563.563 0 01-.812.622l-4.498-3.288a.563.563 0 00-.606 0l-4.498 3.288a.563.563 0 01-.812-.622l1.685-5.345a.563.563 0 00-.182-.557l-4.455-3.242a.563.563 0 01.329-.89h5.518a.563.563 0 00.475-.31l2.125-5.112z" /></svg>
+                    <span>Influencer</span>
+                    <svg class="visited-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+                <button data-target="fazit" id="fazit-button" class="nav-button locked">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>Fazit</span>
+                    <svg class="visited-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+                <button data-target="weiterbildung" id="weiterbildung-button" class="nav-button locked">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                    <span>Mehr Infos</span>
+                    <svg class="visited-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+            </nav>
+            <div id="completion-message-container"></div>
+            <main id="content-display" class="content-card">
+                </main>
+        </div>
+
+        <div id="ai-chat-modal-overlay" class="ai-modal-overlay hidden">
+            <div class="ai-modal-content">
+                <h4><svg class="heading-icon inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:24px; height:24px; color: #7e22ce;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>Frag den KI-Experten</h4>
+                <p class="text-sm text-gray-600 mb-4 text-center">Stell deine Frage zum Thema #instalehrerzimmer, Bildungsinfluencer und Kultur der Digitalität.</p>
+                <textarea id="ai-question-input" placeholder="Deine Frage..." rows="3"></textarea>
+                <button id="ai-submit-question">Frage absenden</button>
+                <div id="ai-response-area" class="hidden">
+                    </div>
+                 <div id="ai-loading-indicator" class="loading-indicator hidden">Wird geladen...</div>
+                <button id="ai-modal-close-button" class="ai-modal-close-button">Schließen</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Content for each section
+        const contentData = {
+            intro: {
+                title: "Einführung: Das digitale Lehrerzimmer als Phänomen",
+                html: `
+                    <p class="mb-4 text-lg">Nach dem ersten Einblick durch das Video: Auf Instagram teilen Lehrkräfte weit mehr als nur Arbeitsblätter – sie formen ihre (Berufs-)Identität. Unter #instalehrerzimmer pulsiert ein virtueller Raum, in dem Unterrichtsideen, Herausforderungen und persönliche Einblicke öffentlich werden.</p>
+                    <p class="mb-4 text-lg">Gleichzeitig prägen Bildungsinfluencer\*innen mit großer Reichweite den Diskurs. Wie verändert dieser digitale Wandel die Schule und die Rolle der Lehrkraft? Klicke dich durch die Stationen und finde es heraus!</p>
+                `
+            },
+            kdd: {
+                title: "Die Kultur der Digitalität (nach F. Stalder)",
+                html: `
+                    <p class="mb-6 text-lg">Felix Stalder beschreibt die 'Kultur der Digitalität' als eine tiefgreifende Transformation, geprägt durch drei zentrale Formen. Sie sind wie die DNA unserer digitalen Welt:</p>
+                    <div class="kdd-section themed-block mb-6 p-6 border-l-4 border-accent bg-accent rounded-r-lg shadow-sm">
+                        <h4><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>1. Referentialität (Remix-Kultur)</h4>
+                        <p class="mb-3">Neues entsteht durch Kombination und Transformation bestehender Materialien. Wie ein DJ, der alte Songs zu neuen Hits mixt.</p>
+                        <ul>
+                            <li><strong class="chance">Chancen:</strong> Globaler Remix (OER-Templates), Innovation (#inklusionschallenge), Demokratisierung des Wissens.</li>
+                            <li><strong class="risiko">Risiken:</strong> Qualitätsverlust ("10-Tipps-Posts"), Urheberrechtskonflikte, ungeprüfte Übernahme.</li>
+                        </ul>
+                    </div>
+                    <div class="kdd-section themed-block mb-6 p-6 border-l-4 border-accent bg-accent rounded-r-lg shadow-sm">
+                        <h4><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-3.741-1.209M12 6A8.967 8.967 0 0121 12.603A9.091 9.091 0 0012 15c-2.17 0-4.207-.576-5.963-1.584A5.963 5.963 0 016 12.603A8.967 8.967 0 0112 6z" /></svg>2. Gemeinschaftlichkeit (Netzwerke)</h4>
+                        <p class="mb-3">Kollektive Konstitution von Bedeutung und Identität in Netzwerken. Gemeinsam sind wir mehr als die Summe unserer Teile.</p>
+                        <ul>
+                            <li><strong class="chance">Chancen:</strong> Dezentrale Solidarität (Support für Burnout, ADHS), hierarchiearmer Austausch, globaler Perspektivwechsel.</li>
+                            <li><strong class="risiko">Risiken:</strong> Filterblasen (Algorithmen bevorzugen Ästhetik), Unsichtbarkeit von Nischenthemen, emotionaler Druck.</li>
+                        </ul>
+                    </div>
+                    <div class="kdd-section themed-block p-6 border-l-4 border-accent bg-accent rounded-r-lg shadow-sm">
+                        <h4><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>3. Algorithmizität (Sichtbarkeit als Wert)</h4>
+                        <p class="mb-3">Automatisierte Prozesse, die Kultur und Informationszugang prägen. Die unsichtbare Hand, die sortiert und empfiehlt.</p>
+                        <ul>
+                            <li><strong class="chance">Chancen:</strong> Sichtbarkeit für Nischen durch Hashtags, Echtzeit-Feedback zu Ideen.</li>
+                            <li><strong class="risiko">Risiken:</strong> Kommerzialisierung, Authentizitätsverlust ("postfähige" Szenen), Abhängigkeit von Algorithmen.</li>
+                        </ul>
+                    </div>
+                `
+            },
+            instalehrerzimmer: {
+                title: "#instalehrerzimmer: Chancen & Risiken",
+                html: `
+                    <p class="mb-6 text-lg">Das #instalehrerzimmer ist mehr als ein Hashtag – es ist ein pulsierender digitaler Raum, der traditionelle Lehrerzimmer erweitert. Hier treffen die Prinzipien der Kultur der Digitalität auf den schulischen Alltag.</p>
+                    <div class="insta-section grid md:grid-cols-2 gap-6">
+                        <div class="themed-block p-6 bg-accent border-l-4 border-accent rounded-r-lg shadow-sm">
+                            <h4><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>Das Gute daran: Chancen</h4>
+                            <ul>
+                                <li>Professioneller Austausch & Ressourcenteilung</li>
+                                <li>Unterstützungsnetzwerke & weniger Isolation</li>
+                                <li>Niedrigschwellige, zugängliche Fortbildung</li>
+                                <li>Inspiration und Anstoß für Innovationen</li>
+                            </ul>
+                        </div>
+                        <div class="themed-block p-6 bg-rose-50 border-l-4 border-rose-500 rounded-r-lg shadow-sm"> 
+                            <h4 class="text-rose-700"><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="stroke: #be123c;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" /></svg>Die Kehrseite: Risiken & Kritik</h4>
+                            <ul>
+                                <li>Oberflächlichkeit & Drang zur Inszenierung</li>
+                                <li>Echokammern & Homogenisierung von Meinungen</li>
+                                <li>Zeitaufwand & Druck zur ständigen Präsenz</li>
+                                <li>Fehlende Qualitätskontrolle & Fehlinformation</li>
+                                <li>Datenschutz & professionelle Grenzen</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            bildungsfluencer: {
+                title: "Bildungsinfluencer*innen: Zwischen Einfluss und Kritik",
+                html: `
+                    <p class="mb-6 text-lg">Bildungsinfluencer – ein heiß diskutiertes Thema! Bevor wir tiefer in die Argumente eintauchen, was denkst du? Wir haben einige Thesen vorbereitet, die zum Diskutieren anregen. Deine Perspektive ist hier gefragt!</p>
+                    
+                    <div class="sequential-poll-container" id="sequentialPoll">
+                        <div class="poll-question-step" id="poll-q1">
+                            <p class="poll-thesis">These 1: "Bildungsinfluencer sind eine <strong>Gefahr</strong> für die Professionalität von Lehrkräften."</p>
+                            <div class="poll-options">
+                                <button class="poll-button agree" data-poll-id="sequentialPoll" data-question-id="q1" data-choice="agree">Stimme zu</button>
+                                <button class="poll-button disagree" data-poll-id="sequentialPoll" data-question-id="q1" data-choice="disagree">Stimme nicht zu</button>
+                            </div>
+                        </div>
+
+                        <div class="poll-question-step hidden" id="poll-q2">
+                            <p class="poll-thesis">These 2: "Das #instalehrerzimmer fördert primär <strong>oberflächlichen Austausch</strong> statt echter kollegialer Kooperation."</p>
+                            <div class="poll-options">
+                                <button class="poll-button agree" data-poll-id="sequentialPoll" data-question-id="q2" data-choice="agree">Trifft eher zu</button>
+                                <button class="poll-button disagree" data-poll-id="sequentialPoll" data-question-id="q2" data-choice="disagree">Trifft eher nicht zu</button>
+                            </div>
+                        </div>
+
+                        <div class="poll-question-step hidden" id="poll-q3">
+                            <p class="poll-thesis">These 3: "Der Hype um <strong>'perfekte' Materialien</strong> und Klassenzimmer auf Instagram setzt Lehrkräfte unnötig unter Druck."</p>
+                            <div class="poll-options">
+                                <button class="poll-button agree" data-poll-id="sequentialPoll" data-question-id="q3" data-choice="agree">Absolut!</button>
+                                <button class="poll-button disagree" data-poll-id="sequentialPoll" data-question-id="q3" data-choice="disagree">Sehe ich nicht so.</button>
+                            </div>
+                        </div>
+
+                        <div id="collected-poll-results" class="hidden mt-6">
+                            <h4 class="text-lg font-semibold mb-4" style="color: #581c87; text-align:center;">Danke für deine Teilnahme! So sieht die (simulierte) Community-Meinung zu den Thesen aus:</h4>
+                            
+                            <div class="mb-4">
+                                <p class="poll-thesis text-sm">These 1: "Bildungsinfluencer sind eine <strong>Gefahr</strong> für die Professionalität..."</p>
+                                <div class="result-bar-container"><div class="result-bar-fill agree" style="width: 70%;">Zustimmung (70%)</div></div>
+                                <div class="result-bar-container"><div class="result-bar-fill disagree" style="width: 30%;">Ablehnung (30%)</div></div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <p class="poll-thesis text-sm">These 2: "Das #instalehrerzimmer fördert primär <strong>oberflächlichen Austausch</strong>..."</p>
+                                <div class="result-bar-container"><div class="result-bar-fill agree" style="width: 55%;">Trifft eher zu (55%)</div></div>
+                                <div class="result-bar-container"><div class="result-bar-fill disagree" style="width: 45%;">Trifft eher nicht zu (45%)</div></div>
+                            </div>
+
+                            <div>
+                                <p class="poll-thesis text-sm">These 3: "Der Hype um <strong>'perfekte' Materialien</strong> setzt Lehrkräfte unter Druck."</p>
+                                <div class="result-bar-container"><div class="result-bar-fill agree" style="width: 80%;">Absolut! (80%)</div></div>
+                                <div class="result-bar-container"><div class="result-bar-fill disagree" style="width: 20%;">Sehe ich nicht so. (20%)</div></div>
+                            </div>
+                            <p class="poll-disclaimer mt-4"><em>Hinweis: Dies ist eine simulierte Abstimmung zur Veranschaulichung. Die nachfolgenden Inhalte bieten weitere Perspektiven.</em></p>
+                        </div>
+                    </div> <div id="bildungsfluencer-details-content" class="post-poll-content hidden">
+                        <p class="mt-8 mb-4 text-lg">Hier nun einige vertiefende Gedanken und Analysen zum Thema Bildungsinfluencer:</p>
+                        <div class="influencer-section themed-block p-6 bg-accent border-l-4 border-accent rounded-r-lg shadow-sm mb-6">
+                            <h4><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52c2.62.352 4.908.908 7.036 1.76m-7.036-1.76A48.417 48.417 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52c2.62.352 4.908.908 7.036 1.76m-7.036-1.76A48.417 48.417 0 0012 4.5c-2.631 0-5.238.18-7.743.52m15.486 0A48.42 48.42 0 0112 10.5c-2.631 0-5.238-.18-7.743-.52m15.486 0c1.042-.162 2.058-.358 3.037-.577m-3.037.577A48.458 48.458 0 0112 15c-2.631 0-5.238-.18-7.743-.52m15.486 0c1.042-.162 2.058-.358 3.037-.577" /></svg>Kritische Perspektive (nach Philippe Wampfler):</h4>
+                            <ul class="mb-4">
+                                <li>Verkaufen Reichweite statt echten Aktivismus zu betreiben.</li>
+                                <li>Federn Kritik am System ab, um niemandem zu schaden.</li>
+                                <li>Profitieren von Defiziten, ohne an echter Veränderung interessiert zu sein.</li>
+                                <li>Oft mangelnde Fachexpertise, Fokus auf Selbstvermarktung.</li>
+                                <li>Verdrängen Fachpersonen und simulieren Scheinkritik.</li>
+                            </ul>
+                        </div>
+                        <div class="influencer-section themed-block p-6 bg-sky-50 border-l-4 border-sky-500 rounded-r-lg shadow-sm"> <h4 class="text-sky-700"><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="stroke: #0369a1;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>Fallbeispiel: Frau Waibel (@frau_waibel)</h4>
+                            <p class="mb-3">Gina Waibel thematisiert antirassistische Bildung und politische Inhalte, teilt Lehrmaterial, ist aber auch umstritten (Stichwort: <strong>Mäßigungsgebot</strong>).</p>
+                            <ul>
+                                <li><strong class="chance">Potenzial:</strong> Nutzt Reichweite für aktivistische Positionen, regt Diskussionen an, stellt Materialien bereit.</li>
+                                <li><strong class="risiko">Kontroversen:</strong> Vorwurf des Verstoßes gegen Mäßigungsgebot, politische Äußerungen führen zu Konflikten, kommerzielle Aspekte (Shop).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    `
+            },
+            fazit: {
+                title: "Fazit & Ethische Wegweiser",
+                html: `
+                    <p class="mb-6 text-lg">Das #instalehrerzimmer und Bildungsinfluencer\*innen sind komplexe Phänomene der Kultur der Digitalität. Sie bieten Chancen, bergen aber auch Risiken. Eine kritische Haltung ist Gold wert!</p>
+                    <div class="fazit-section themed-block p-6 bg-accent border-l-4 border-accent rounded-r-lg shadow-sm mb-6">
+                        <h4><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-4.5A3.375 3.375 0 0012.75 9.75H11.25A3.375 3.375 0 007.5 13.125V18.75m9 0h-9" /></svg>Kernbotschaften für den Rucksack:</h4>
+                        <ul class="mb-4">
+                            <li>Instagram ist kein <strong>neutraler Raum</strong> – Plattformlogik prägt Inhalte.</li>
+                            <li>Professionalisierung braucht <strong>Kritikfähigkeit</strong> – nicht jeder Post ist Fortschritt.</li>
+                            <li><strong>Ethik</strong> muss mitgestalten – sonst wird Bildung zur Ware.</li>
+                            <li>Kritische <strong>digitale Literalität</strong> für Lehrkräfte ist entscheidend.</li>
+                        </ul>
+                    </div>
+                    <div class="fazit-section themed-block p-6 bg-purple-50 border-l-4 border-purple-600 rounded-r-lg shadow-sm"> <h4 class="text-purple-800"><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="stroke: #581c87;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Ethische Imperative (Unser Kompass):</h4>
+                        <ul class="mb-4">
+                            <li><strong>Authentizität & Transparenz:</strong> Kooperationen und Expertise klar kennzeichnen.</li>
+                            <li><strong>Datenschutz:</strong> Verantwortungsvoller Umgang mit Schüler\*innendaten.</li>
+                            <li><strong>Verantwortung:</strong> Auswirkungen auf Schüler\*innen und den Lehrberuf reflektieren.</li>
+                            <li><strong>Mäßigungsgebot:</strong> Politische Äußerungen und Berufsrolle abwägen.</li>
+                            <li><strong>Digitale Gerechtigkeit:</strong> Hinterfragen, wessen Stimmen gehört werden.</li>
+                        </ul>
+                    </div>
+                `
+            },
+            weiterbildung: {
+                title: "Weiterführende Informationen & Ressourcen",
+                html: `
+                    <p class="mb-6 text-lg">Hier findest du einige Links zu offiziellen Stellungnahmen und weiterführenden Diskussionen, um dich noch tiefer mit der Thematik auseinanderzusetzen:</p>
+                    <div class="weiterbildung-section">
+                        <div class="resource-grid">
+                            <div class="resource-card">
+                                <h5><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>Umgang mit sozialen Netzwerken (BRD NRW)</h5>
+                                <p>Handreichung der Bezirksregierung Düsseldorf zum Umgang von Lehrkräften mit sozialen Netzwerken.</p>
+                                <a href="https://www.brd.nrw.de/themen/schule-bildung/lehrkraefte-personal/personalangelegenheiten/umgang-mit-sozialen-netzwerken" target="_blank" rel="noopener noreferrer" class="external-link-button">Zur Handreichung</a>
+                            </div>
+                            <div class="resource-card">
+                                <h5><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>Mäßigungsgebot (Flyer Bez.Reg. MS)</h5>
+                                <p>Flyer der Bezirksregierung Münster zum Umgang von Lehrkräften mit sozialen Medien.</p>
+                                <a href="https://www.bezreg-muenster.de/zentralablage/dokumente/schule_und_bildung/digitale_bildung/datenschutz_it_sicherheit/Flyer_Social_Media_Lehrkraefte_web.pdf" target="_blank" rel="noopener noreferrer" class="external-link-button">Zum Flyer</a>
+                            </div>
+                             <div class="resource-card">
+                                <h5><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18V8.625c0-.621.504-1.125 1.125-1.125H7.5" /></svg>Kritik an Bildungsinfluencern (Wampfler)</h5>
+                                <p>Der vielzitierte Artikel von Philippe Wampfler zur kritischen Betrachtung von Bildungsinfluencer\*innen.</p>
+                                <a href="https://schulesocialmedia.com/2024/09/23/wie-bildungsinfluencerinnen-die-bildungskrise-bewirtschaften-und-verscharfen/" target="_blank" rel="noopener noreferrer" class="external-link-button">Zum Artikel</a>
+                            </div>
+                            <div class="resource-card" id="ai-expert-card">
+                                <h5><svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>Frag den KI-Experten</h5>
+                                <p>Hast du spezifische Fragen? Unser KI-Assistent hilft dir, wissenschaftlich fundierte Antworten zu finden.</p>
+                                <a id="open-ai-modal-button" class="external-link-button">Frage stellen</a>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+        
+        // DOM Elements
+        const initialVideoSection = document.getElementById('initial-video-section');
+        const interactiveSection = document.getElementById('interactive-section');
+        const proceedButton = document.getElementById('proceed-to-interactive');
+        const contentDisplay = document.getElementById('content-display');
+        const navButtons = Array.from(document.querySelectorAll('.nav-button'));
+        const fazitButton = document.getElementById('fazit-button');
+        const weiterbildungButton = document.getElementById('weiterbildung-button'); 
+        
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const completionMessageContainer = document.getElementById('completion-message-container');
+
+        // AI Modal Elements
+        const aiModalOverlay = document.getElementById('ai-chat-modal-overlay');
+        const aiModalCloseButton = document.getElementById('ai-modal-close-button');
+        const aiSubmitQuestionButton = document.getElementById('ai-submit-question');
+        const aiQuestionInput = document.getElementById('ai-question-input');
+        const aiResponseArea = document.getElementById('ai-response-area');
+        const aiLoadingIndicator = document.getElementById('ai-loading-indicator');
+        
+        // State variables
+        const visitedSections = new Set();
+        const sectionsForFazitUnlock = ['intro', 'kdd', 'instalehrerzimmer', 'bildungsfluencer'];
+        const totalSectionsToVisitForFazit = sectionsForFazitUnlock.length;
+        
+        let currentSequentialPollStep = 0;
+        const totalSequentialPollSteps = 3; // Number of questions in the sequential poll
+
+        // Function to update the progress bar
+        function updateProgressBar() {
+            const relevantVisitedCount = sectionsForFazitUnlock.filter(sectionKey => visitedSections.has(sectionKey)).length;
+            const progressPercentage = totalSectionsToVisitForFazit > 0 ? Math.round((relevantVisitedCount / totalSectionsToVisitForFazit) * 100) : 0;
+            progressBarFill.style.width = `${progressPercentage}%`;
+            progressBarFill.textContent = `${progressPercentage}%`;
+        }
+
+        // Function to check and update button lock states
+        function checkButtonLocks() {
+            const mainSectionsVisitedCount = sectionsForFazitUnlock.filter(sectionKey => visitedSections.has(sectionKey)).length;
+            // Unlock Fazit if all main sections are visited
+            if (mainSectionsVisitedCount >= totalSectionsToVisitForFazit) {
+                fazitButton.classList.remove('locked');
+                fazitButton.disabled = false;
+                 // Show completion message only once when Fazit is unlocked and not yet visited
+                 if (!completionMessageContainer.querySelector('.completion-message') && !visitedSections.has('weiterbildung') && !visitedSections.has('fazit')) { 
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'completion-message';
+                    messageDiv.textContent = 'Super! Du hast alle Hauptbereiche erkundet. Das Fazit ist jetzt freigeschaltet.';
+                    completionMessageContainer.innerHTML = ''; // Clear previous messages
+                    completionMessageContainer.appendChild(messageDiv);
+                }
+            } else {
+                fazitButton.classList.add('locked');
+                fazitButton.disabled = true;
+            }
+
+            // Unlock Weiterbildung if Fazit is visited
+            if (visitedSections.has('fazit')) {
+                weiterbildungButton.classList.remove('locked');
+                weiterbildungButton.disabled = false;
+                // Clear the "Fazit unlocked" message if it exists
+                const existingMessage = completionMessageContainer.querySelector('.completion-message');
+                if (existingMessage && existingMessage.textContent.includes("Fazit ist jetzt freigeschaltet")) {
+                     completionMessageContainer.innerHTML = ''; // Clear the message
+                }
+            } else {
+                weiterbildungButton.classList.add('locked');
+                weiterbildungButton.disabled = true;
+            }
+        }
+
+
+        // Function to set initial states of navigation buttons
+        function setInitialButtonStates() {
+            navButtons.forEach(btn => {
+                btn.classList.remove('active', 'visited');
+                if (btn.dataset.target === 'intro') {
+                    btn.classList.add('active'); // 'intro' is active by default
+                }
+                // Lock 'fazit' and 'weiterbildung' buttons initially
+                if (btn.dataset.target === 'fazit' || btn.dataset.target === 'weiterbildung') {
+                    btn.classList.add('locked');
+                    btn.disabled = true;
+                } else {
+                    btn.disabled = false; // Other buttons are enabled
+                }
+            });
+             checkButtonLocks(); // Check locks based on initial state (no sections visited yet)
+        }
+
+        // Function to show the interactive content and hide the initial video section
+        function showInteractiveContent() {
+            initialVideoSection.classList.add('hidden');
+            interactiveSection.classList.remove('hidden');
+            interactiveSection.classList.add('content-fade-in'); // Apply fade-in animation
+            setInitialButtonStates(); // Set button states for the interactive section
+            updateProgressBar(); // Update progress bar (should be 0% initially)
+            loadContent('intro'); // Load the 'intro' content by default
+        }
+
+        // Event listener for the proceed button
+        proceedButton.addEventListener('click', showInteractiveContent);
+
+        // Function to load content into the main display area
+        function loadContent(targetKey) {
+            const buttonIsLocked = navButtons.find(btn => btn.dataset.target === targetKey)?.classList.contains('locked');
+            if (buttonIsLocked) return; // Do nothing if the button is locked
+
+            const content = contentData[targetKey];
+            if (content) {
+                visitedSections.add(targetKey); // Mark section as visited
+                currentSequentialPollStep = 0; // Reset poll step if navigating to a new section
+
+                // Fade out old content
+                if (contentDisplay.firstChild && contentDisplay.firstChild.nodeType === 1) { // Check if firstChild is an element
+                    contentDisplay.firstChild.style.opacity = 0;
+                    contentDisplay.firstChild.style.transform = 'translateY(10px)';
+                }
+                // After fade out, load new content
+                setTimeout(() => {
+                    let newHtml = `<h3 class="content-title">${content.title || 'Titel nicht gefunden'}</h3>`;
+                    newHtml += content.html;
+                    const newContentDiv = document.createElement('div');
+                    newContentDiv.innerHTML = newHtml;
+                    newContentDiv.className = 'content-fade-in'; // Apply fade-in to new content
+                    contentDisplay.innerHTML = ''; // Clear old content
+                    contentDisplay.appendChild(newContentDiv);
+                    
+                    // Initialize poll if the current section is 'bildungsfluencer'
+                    if (targetKey === 'bildungsfluencer') {
+                        initializeSequentialPoll(newContentDiv);
+                    }
+                    // Add event listener for AI expert card if in 'weiterbildung'
+                    if (targetKey === 'weiterbildung') {
+                        const openAiModalBtn = newContentDiv.querySelector('#open-ai-modal-button');
+                        if (openAiModalBtn) {
+                            openAiModalBtn.addEventListener('click', () => {
+                                aiModalOverlay.classList.remove('hidden');
+                                aiModalOverlay.classList.add('visible');
+                            });
+                        }
+                    }
+
+
+                    // Update navigation button styles
+                    navButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (visitedSections.has(btn.dataset.target)) { btn.classList.add('visited'); }
+                        else { btn.classList.remove('visited'); }
+                        if (btn.dataset.target === targetKey) { btn.classList.add('active'); }
+                    });
+                    updateProgressBar(); // Update progress
+                    checkButtonLocks(); // Check if any buttons should be unlocked
+                }, 250); // Delay matches CSS transition
+            }
+        }
+        
+        // Function to initialize and manage the sequential poll
+        function initializeSequentialPoll(container) {
+            const pollContainer = container.querySelector('#sequentialPoll');
+            if (!pollContainer) return;
+
+            const pollSteps = Array.from(pollContainer.querySelectorAll('.poll-question-step'));
+            const postPollContentDiv = container.querySelector('#bildungsfluencer-details-content');
+            const collectedResultsDiv = pollContainer.querySelector('#collected-poll-results');
+            currentSequentialPollStep = 0; // Reset to the first question
+
+            function showNextPollStep() {
+                // Hide all steps, then show the current one
+                pollSteps.forEach((step, index) => {
+                    step.classList.toggle('hidden', index !== currentSequentialPollStep);
+                });
+
+                if (currentSequentialPollStep < totalSequentialPollSteps) {
+                    const currentStepContainer = pollSteps[currentSequentialPollStep];
+                    const pollButtons = currentStepContainer.querySelectorAll('.poll-button');
+                    const optionsDiv = currentStepContainer.querySelector('.poll-options');
+                    
+                    pollButtons.forEach(button => {
+                        button.addEventListener('click', function handleVote() {
+                            // Hide options after voting on the current question
+                            if (optionsDiv) {
+                                optionsDiv.classList.add('hidden'); 
+                            }
+                            currentSequentialPollStep++; // Move to the next question
+                            if (currentSequentialPollStep < totalSequentialPollSteps) {
+                                showNextPollStep(); // Show the next question
+                            } else {
+                                // All questions answered, show results and post-poll content
+                                if (collectedResultsDiv) {
+                                    collectedResultsDiv.classList.remove('hidden'); 
+                                }
+                                if (postPollContentDiv) {
+                                    setTimeout(() => { // Slight delay for smoother transition
+                                        postPollContentDiv.classList.remove('hidden');
+                                    }, 100);
+                                }
+                            }
+                        }, { once: true }); // Event listener fires only once per button
+                    });
+                }
+            }
+            // Start the poll if there are steps
+            if (pollSteps.length > 0) {
+                showNextPollStep(); 
+            }
+        }
+
+        // Add event listeners to navigation buttons
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (!button.classList.contains('locked')) { // Only load if not locked
+                    loadContent(button.dataset.target);
+                }
+            });
+        });
+
+        // AI Modal Logic
+        if (aiModalOverlay && aiModalCloseButton && aiSubmitQuestionButton && aiQuestionInput && aiResponseArea && aiLoadingIndicator) {
+            aiModalCloseButton.addEventListener('click', () => {
+                aiModalOverlay.classList.add('hidden');
+                aiModalOverlay.classList.remove('visible');
+                aiResponseArea.classList.add('hidden');
+                aiResponseArea.innerHTML = ''; // Clear response
+                aiQuestionInput.value = ''; // Clear input on close
+            });
+
+            // Close modal if overlay is clicked
+            aiModalOverlay.addEventListener('click', (event) => {
+                if (event.target === aiModalOverlay) { 
+                    aiModalOverlay.classList.add('hidden');
+                    aiModalOverlay.classList.remove('visible');
+                    aiResponseArea.classList.add('hidden');
+                    aiResponseArea.innerHTML = ''; // Clear response
+                    aiQuestionInput.value = '';
+                }
+            });
+
+            aiSubmitQuestionButton.addEventListener('click', async () => {
+                const userQuestion = aiQuestionInput.value.trim();
+                if (!userQuestion) {
+                    aiResponseArea.innerHTML = 'Bitte gib eine Frage ein.'; // Use innerHTML
+                    aiResponseArea.classList.remove('hidden');
+                    return;
+                }
+
+                aiLoadingIndicator.classList.remove('hidden');
+                aiResponseArea.classList.add('hidden');
+                aiResponseArea.innerHTML = ''; // Clear previous response
+
+                // Construct the prompt for the Gemini API
+                const prompt = `Du bist ein Experte für Lehren und Lernen in Kulturen der Digitalität, insbesondere zu den Themen #instalehrerzimmer und Bildungsinfluencer. Bitte beantworte die folgende Frage wissenschaftlich fundiert und verständlich:\n\nFrage: ${userQuestion}\n\nAntwort:`;
+                
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Provided by Canvas at runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    // Process the API response
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        let rawText = result.candidates[0].content.parts[0].text;
+                        // Convert basic Markdown bold (**text**) to HTML bold (<strong>text</strong>)
+                        let htmlText = rawText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        aiResponseArea.innerHTML = htmlText; // Use innerHTML to render potential HTML
+                    } else {
+                        console.error("API response structure unexpected or content missing:", result);
+                        let errorMessage = "Entschuldigung, ich konnte keine Antwort generieren. Bitte versuche es später erneut oder formuliere deine Frage anders. Details: Unerwartete API-Antwortstruktur.";
+                         if (result.error) { 
+                            errorMessage += `\nFehlermeldung: ${result.error.message}`;
+                        }
+                        aiResponseArea.innerHTML = errorMessage; // Use innerHTML
+                    }
+                } catch (error) {
+                    console.error("Error fetching AI response:", error);
+                    aiResponseArea.innerHTML = "Entschuldigung, ein Fehler ist aufgetreten. Bitte versuche es später erneut. Details: " + error.message; // Use innerHTML
+                } finally {
+                    aiLoadingIndicator.classList.add('hidden');
+                    aiResponseArea.classList.remove('hidden');
+                }
+            });
+        } else {
+            console.error("Ein oder mehrere AI-Modal-Elemente wurden nicht im DOM gefunden. Die KI-Chat-Funktionalität ist möglicherweise beeinträchtigt.");
+        }
+
+    </script>
+
+</body>
+</html>
